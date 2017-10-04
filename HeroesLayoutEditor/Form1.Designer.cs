@@ -30,10 +30,9 @@
         {
             this.ListBoxObjects = new System.Windows.Forms.ListBox();
             this.ButtonFindNextLink = new System.Windows.Forms.Button();
-            this.ComboBoxList = new System.Windows.Forms.ComboBox();
-            this.ComboBoxObjectPicker = new System.Windows.Forms.ComboBox();
+            this.ComboBoxObject = new System.Windows.Forms.ComboBox();
             this.PropertyGridMisc = new System.Windows.Forms.PropertyGrid();
-            this.RichTextBoxProperties = new System.Windows.Forms.RichTextBox();
+            this.RichTextBoxDescription = new System.Windows.Forms.RichTextBox();
             this.GroupBoxGameStuff = new System.Windows.Forms.GroupBox();
             this.ButtonTeleport = new System.Windows.Forms.Button();
             this.GroupBoxGetRot = new System.Windows.Forms.GroupBox();
@@ -48,8 +47,7 @@
             this.NumericObjRend = new System.Windows.Forms.NumericUpDown();
             this.LabelLinkId = new System.Windows.Forms.Label();
             this.NumericObjLink = new System.Windows.Forms.NumericUpDown();
-            this.LabelType = new System.Windows.Forms.Label();
-            this.LabelList = new System.Windows.Forms.Label();
+            this.LabelObject = new System.Windows.Forms.Label();
             this.GroupBox2 = new System.Windows.Forms.GroupBox();
             this.NumericRotZ = new System.Windows.Forms.NumericUpDown();
             this.NumericRotY = new System.Windows.Forms.NumericUpDown();
@@ -71,9 +69,9 @@
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.GroupBoxGameStuff.SuspendLayout();
             this.GroupBoxGetRot.SuspendLayout();
             this.GroupBoxGetPos.SuspendLayout();
@@ -111,23 +109,14 @@
             this.ButtonFindNextLink.UseVisualStyleBackColor = true;
             this.ButtonFindNextLink.Click += new System.EventHandler(this.ButtonFindNextLink_Click);
             // 
-            // ComboBoxList
+            // ComboBoxObject
             // 
-            this.ComboBoxList.FormattingEnabled = true;
-            this.ComboBoxList.Location = new System.Drawing.Point(199, 41);
-            this.ComboBoxList.Name = "ComboBoxList";
-            this.ComboBoxList.Size = new System.Drawing.Size(119, 21);
-            this.ComboBoxList.TabIndex = 44;
-            this.ComboBoxList.SelectedIndexChanged += new System.EventHandler(this.ComboBoxList_SelectedIndexChanged);
-            // 
-            // ComboBoxObjectPicker
-            // 
-            this.ComboBoxObjectPicker.FormattingEnabled = true;
-            this.ComboBoxObjectPicker.Location = new System.Drawing.Point(324, 42);
-            this.ComboBoxObjectPicker.Name = "ComboBoxObjectPicker";
-            this.ComboBoxObjectPicker.Size = new System.Drawing.Size(156, 21);
-            this.ComboBoxObjectPicker.TabIndex = 45;
-            this.ComboBoxObjectPicker.SelectedIndexChanged += new System.EventHandler(this.ComboBoxObjectPicker_SelectedIndexChanged);
+            this.ComboBoxObject.FormattingEnabled = true;
+            this.ComboBoxObject.Location = new System.Drawing.Point(199, 41);
+            this.ComboBoxObject.Name = "ComboBoxObject";
+            this.ComboBoxObject.Size = new System.Drawing.Size(281, 21);
+            this.ComboBoxObject.TabIndex = 44;
+            this.ComboBoxObject.SelectedIndexChanged += new System.EventHandler(this.ComboBoxObjects_SelectedIndexChanged);
             // 
             // PropertyGridMisc
             // 
@@ -142,17 +131,17 @@
             // 
             // RichTextBoxProperties
             // 
-            this.RichTextBoxProperties.BackColor = System.Drawing.SystemColors.Control;
-            this.RichTextBoxProperties.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.RichTextBoxProperties.Cursor = System.Windows.Forms.Cursors.Default;
-            this.RichTextBoxProperties.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.RichTextBoxProperties.Location = new System.Drawing.Point(404, 324);
-            this.RichTextBoxProperties.Name = "RichTextBoxProperties";
-            this.RichTextBoxProperties.ReadOnly = true;
-            this.RichTextBoxProperties.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.RichTextBoxProperties.Size = new System.Drawing.Size(174, 63);
-            this.RichTextBoxProperties.TabIndex = 50;
-            this.RichTextBoxProperties.Text = "";
+            this.RichTextBoxDescription.BackColor = System.Drawing.SystemColors.Control;
+            this.RichTextBoxDescription.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.RichTextBoxDescription.Cursor = System.Windows.Forms.Cursors.Default;
+            this.RichTextBoxDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.RichTextBoxDescription.Location = new System.Drawing.Point(404, 324);
+            this.RichTextBoxDescription.Name = "RichTextBoxProperties";
+            this.RichTextBoxDescription.ReadOnly = true;
+            this.RichTextBoxDescription.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
+            this.RichTextBoxDescription.Size = new System.Drawing.Size(174, 63);
+            this.RichTextBoxDescription.TabIndex = 50;
+            this.RichTextBoxDescription.Text = "";
             // 
             // GroupBoxGameStuff
             // 
@@ -307,23 +296,14 @@
             this.NumericObjLink.TabIndex = 47;
             this.NumericObjLink.ValueChanged += new System.EventHandler(this.NumericObjLink_ValueChanged);
             // 
-            // LabelType
+            // LabelObject
             // 
-            this.LabelType.AutoSize = true;
-            this.LabelType.Location = new System.Drawing.Point(321, 26);
-            this.LabelType.Name = "LabelType";
-            this.LabelType.Size = new System.Drawing.Size(68, 13);
-            this.LabelType.TabIndex = 41;
-            this.LabelType.Text = "Object Type:";
-            // 
-            // LabelList
-            // 
-            this.LabelList.AutoSize = true;
-            this.LabelList.Location = new System.Drawing.Point(199, 26);
-            this.LabelList.Name = "LabelList";
-            this.LabelList.Size = new System.Drawing.Size(60, 13);
-            this.LabelList.TabIndex = 40;
-            this.LabelList.Text = "Object List:";
+            this.LabelObject.AutoSize = true;
+            this.LabelObject.Location = new System.Drawing.Point(199, 26);
+            this.LabelObject.Name = "LabelObject";
+            this.LabelObject.Size = new System.Drawing.Size(41, 13);
+            this.LabelObject.TabIndex = 40;
+            this.LabelObject.Text = "Object:";
             // 
             // GroupBox2
             // 
@@ -561,24 +541,24 @@
             this.saveAsToolStripMenuItem.Text = "Save As...";
             this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
             // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(120, 6);
+            // 
+            // aboutToolStripMenuItem
+            // 
+            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(123, 22);
+            this.aboutToolStripMenuItem.Text = "About";
+            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
+            // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(123, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
-            // 
-            // aboutToolStripMenuItem
-            // 
-            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.aboutToolStripMenuItem.Text = "About";
-            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -591,17 +571,15 @@
             this.Controls.Add(this.ButtonRemove);
             this.Controls.Add(this.ButtonAdd);
             this.Controls.Add(this.ButtonFindNextLink);
-            this.Controls.Add(this.ComboBoxList);
-            this.Controls.Add(this.ComboBoxObjectPicker);
+            this.Controls.Add(this.ComboBoxObject);
             this.Controls.Add(this.PropertyGridMisc);
-            this.Controls.Add(this.RichTextBoxProperties);
+            this.Controls.Add(this.RichTextBoxDescription);
             this.Controls.Add(this.GroupBoxGameStuff);
             this.Controls.Add(this.LabelRend);
             this.Controls.Add(this.NumericObjRend);
             this.Controls.Add(this.LabelLinkId);
             this.Controls.Add(this.NumericObjLink);
-            this.Controls.Add(this.LabelType);
-            this.Controls.Add(this.LabelList);
+            this.Controls.Add(this.LabelObject);
             this.Controls.Add(this.GroupBox2);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.ListBoxObjects);
@@ -636,10 +614,9 @@
         #endregion
         internal System.Windows.Forms.ListBox ListBoxObjects;
         internal System.Windows.Forms.Button ButtonFindNextLink;
-        internal System.Windows.Forms.ComboBox ComboBoxList;
-        internal System.Windows.Forms.ComboBox ComboBoxObjectPicker;
+        internal System.Windows.Forms.ComboBox ComboBoxObject;
         internal System.Windows.Forms.PropertyGrid PropertyGridMisc;
-        internal System.Windows.Forms.RichTextBox RichTextBoxProperties;
+        internal System.Windows.Forms.RichTextBox RichTextBoxDescription;
         internal System.Windows.Forms.GroupBox GroupBoxGameStuff;
         internal System.Windows.Forms.Button ButtonTeleport;
         internal System.Windows.Forms.GroupBox GroupBoxGetRot;
@@ -654,8 +631,7 @@
         internal System.Windows.Forms.NumericUpDown NumericObjRend;
         internal System.Windows.Forms.Label LabelLinkId;
         internal System.Windows.Forms.NumericUpDown NumericObjLink;
-        internal System.Windows.Forms.Label LabelType;
-        internal System.Windows.Forms.Label LabelList;
+        internal System.Windows.Forms.Label LabelObject;
         internal System.Windows.Forms.GroupBox GroupBox2;
         internal System.Windows.Forms.NumericUpDown NumericRotZ;
         internal System.Windows.Forms.NumericUpDown NumericRotY;

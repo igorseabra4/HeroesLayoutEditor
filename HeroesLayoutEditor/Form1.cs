@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
-using System.Drawing;
 using System.Runtime.InteropServices;
 
 namespace HeroesLayoutEditor
@@ -14,11 +13,11 @@ namespace HeroesLayoutEditor
         {
             InitializeComponent();
 
-            if (File.Exists("ObjectList.ini") & File.Exists("ListList.ini"))
-                ReadObjectListData("ObjectList.ini", "ListList.ini");
+            if (File.Exists("Resources\\ObjectList.ini"))
+                ReadObjectListData("Resources\\ObjectList.ini");
             else
             {
-                MessageBox.Show("Error loading external.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error loading object list file.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Close();
             }
 
@@ -46,24 +45,24 @@ namespace HeroesLayoutEditor
             public byte List;
             public byte Type;
             public string Name;
-            public bool NoMiscSettings;
+            public bool HasMiscSettings;
             public string DebugName;
             public string LinkID;
             public string Description;
 
             public ObjectEntry()
             {
-                NoMiscSettings = false;
+                HasMiscSettings = false;
             }
 
             public override string ToString()
             {
                 if (Name != "")
-                    return Type.ToString("X2") + " " + Name;
+                    return List.ToString("X2") + " " + Type.ToString("X2") + " " + Name;
                 else if (DebugName != "")
-                    return Type.ToString("X2") + " " + DebugName;
+                    return List.ToString("X2") + " " + Type.ToString("X2") + " " + DebugName;
                 else
-                    return Type.ToString("X2") + " Unknown/Unused";
+                    return List.ToString("X2") + " " + Type.ToString("X2") + " Unknown/Unused";
             }
 
             public string GetName()
@@ -76,30 +75,17 @@ namespace HeroesLayoutEditor
                     return "Unknown/Unused";
             }
         }
-
-        static List<ObjectEntry> ObjectEntryStream = new List<ObjectEntry>();
-
-        public class ListEntry
+                
+        void ReadObjectListData(string FileName)
         {
-            public string ListName;
-            public byte List;
+            ComboBoxObject.Items.Clear();
 
-            public ListEntry() { }
-
-            public override string ToString()
-            {
-                return List.ToString("X2") + " " + ListName;
-            }
-        }
-
-        void ReadObjectListData(string FileName, string ListFileName)
-        {
             string[] ObjectListFile = File.ReadAllLines(FileName);
 
             byte List = 0;
             byte Type = 0;
             string Name = "";
-            bool NoMiscSettings = false;
+            bool HasMiscSettings = true;
             string DebugName = "";
             string LinkID = "";
             string Description = "";
@@ -114,7 +100,7 @@ namespace HeroesLayoutEditor
                 else if (i.StartsWith("Object="))
                     Name = i.Split('=')[1];
                 else if (i.StartsWith("NoMiscSettings="))
-                    NoMiscSettings = Convert.ToBoolean(i.Split('=')[1]);
+                    HasMiscSettings = !Convert.ToBoolean(i.Split('=')[1]);
                 else if (i.StartsWith("Debug="))
                     DebugName = i.Split('=')[1];
                 else if (i.StartsWith("LinkID="))
@@ -123,12 +109,12 @@ namespace HeroesLayoutEditor
                     Description = i.Split('=')[1];
                 else if (i.StartsWith("EndOfFile"))
                 {
-                    ObjectEntryStream.Add(new ObjectEntry()
+                    ComboBoxObject.Items.Add(new ObjectEntry()
                     {
                         List = List,
                         Type = Type,
                         Name = Name,
-                        NoMiscSettings = NoMiscSettings,
+                        HasMiscSettings = HasMiscSettings,
                         DebugName = DebugName,
                         LinkID = LinkID,
                         Description = Description
@@ -137,12 +123,12 @@ namespace HeroesLayoutEditor
                 }
                 else if (i.Length == 0)
                 {
-                    ObjectEntryStream.Add(new ObjectEntry()
+                    ComboBoxObject.Items.Add(new ObjectEntry()
                     {
                         List = List,
                         Type = Type,
                         Name = Name,
-                        NoMiscSettings = NoMiscSettings,
+                        HasMiscSettings = HasMiscSettings,
                         DebugName = DebugName,
                         LinkID = LinkID,
                         Description = Description
@@ -150,24 +136,11 @@ namespace HeroesLayoutEditor
                     List = 0;
                     Type = 0;
                     Name = "";
-                    NoMiscSettings = false;
+                    HasMiscSettings = true;
                     DebugName = "";
                     LinkID = "";
                     Description = "";
                 }
-            }
-
-            string[] ListListFile = File.ReadAllLines(ListFileName);
-
-            ComboBoxList.Items.Clear();
-
-            foreach (string i in ListListFile)
-            {
-                ComboBoxList.Items.Add(new ListEntry
-                {
-                    List = Convert.ToByte(i.Substring(0, 2), 16),
-                    ListName = i.Substring(3)
-                });
             }
         }
 
@@ -189,12 +162,12 @@ namespace HeroesLayoutEditor
             public byte Link;
             public byte RendDist;
 
-            public bool HasMiscID;
+            public bool HasMiscSettings;
             public bool isSelected;
 
             public SETObject()
             {
-                HasMiscID = true;
+                HasMiscSettings = true;
                 isSelected = false;
                 MiscSettings = new byte[36];
                 RendDist = 10;
@@ -211,7 +184,7 @@ namespace HeroesLayoutEditor
             public void FindName()
             {
                 NameInternal = "Unknown/Unused";
-                foreach (ObjectEntry j in ObjectEntryStream)
+                foreach (ObjectEntry j in Program.MainForm.ComboBoxObject.Items)
                     if (j.List == List & j.Type == Type)
                     {
                         NameInternal = j.GetName();
@@ -233,6 +206,7 @@ namespace HeroesLayoutEditor
             DisableAllEditors();
             TextBoxNumOfObjects.Text = "0 objects";
             OpenLayoutFile.FileName = null;
+            LabelFileLoaded.Text = "No file loaded";
         }
 
         OpenFileDialog OpenLayoutFile = new OpenFileDialog();
@@ -249,7 +223,7 @@ namespace HeroesLayoutEditor
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (OpenLayoutFile.FileName != null)
+            if (OpenLayoutFile.FileName != null & OpenLayoutFile.FileName != "")
                 SaveFile(OpenLayoutFile.FileName);
             else
             {
@@ -266,6 +240,7 @@ namespace HeroesLayoutEditor
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveLayoutFile.Filter = ".bin files|*.bin";
+            SaveLayoutFile.FileName = OpenLayoutFile.FileName;
             DialogResult result = SaveLayoutFile.ShowDialog();
             if (result == DialogResult.OK)
             {
@@ -328,7 +303,7 @@ namespace HeroesLayoutEditor
 
                 int MiscSettings = SwitchEndInt(LayoutFileReader.ReadBytes(4));
                 if (MiscSettings == 0)
-                    TempObject.HasMiscID = false;
+                    TempObject.HasMiscSettings = false;
                 else
                 {
                     LayoutFileReader.BaseStream.Position = 0x18000 + (0x24 * MiscSettings);
@@ -370,15 +345,7 @@ namespace HeroesLayoutEditor
 
         public void SaveFile(string OutputFileName)
         {
-            if (IsFileLocked(new FileInfo(OutputFileName)))
-            {
-                DialogResult result = MessageBox.Show("File is being used by another process", "Error", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error);
-                if (result == DialogResult.Retry)
-                    SaveFile(OutputFileName);
-                return;
-            }
-
-            BinaryWriter LayoutFileWriter = new BinaryWriter(new FileStream(OutputFileName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None));
+            BinaryWriter LayoutFileWriter = new BinaryWriter(new FileStream(OutputFileName, FileMode.Create));
 
             byte CurrentNum;
 
@@ -439,7 +406,7 @@ namespace HeroesLayoutEditor
                 LayoutFileWriter.Write(i.Link);
                 LayoutFileWriter.Write(i.RendDist);
 
-                if (i.HasMiscID == true)
+                if (i.HasMiscSettings == true)
                 {
                     LayoutFileWriter.Write(BitConverter.GetBytes(j)[3]);
                     LayoutFileWriter.Write(BitConverter.GetBytes(j)[2]);
@@ -464,13 +431,18 @@ namespace HeroesLayoutEditor
                 else
                     LayoutFileWriter.Write(0);
             }
+
             LayoutFileWriter.Close();
+            LabelFileLoaded.Text = "Loaded " + OpenLayoutFile.FileName;
         }
+
+        bool EditorsAreEnabled = false;
 
         public void EnableAllEditors()
         {
-            ComboBoxList.Enabled = true;
-            ComboBoxObjectPicker.Enabled = true;
+            if (EditorsAreEnabled) return;
+
+            ComboBoxObject.Enabled = true;
             NumericObjLink.Enabled = true;
             NumericObjRend.Enabled = true;
             NumericPosX.Enabled = true;
@@ -488,12 +460,13 @@ namespace HeroesLayoutEditor
             ButtonTeleport.Enabled = true;
             GroupBoxGetPos.Enabled = true;
             GroupBoxGetRot.Enabled = true;
+
+            EditorsAreEnabled = true;
         }
 
         public void DisableAllEditors()
         {
-            ComboBoxList.Enabled = false;
-            ComboBoxObjectPicker.Enabled = false;
+            ComboBoxObject.Enabled = false;
             NumericObjLink.Enabled = false;
             NumericObjRend.Enabled = false;
             NumericPosX.Enabled = false;
@@ -511,6 +484,8 @@ namespace HeroesLayoutEditor
             ButtonTeleport.Enabled = false;
             GroupBoxGetPos.Enabled = false;
             GroupBoxGetRot.Enabled = false;
+
+            EditorsAreEnabled = false;
         }
 
         private void ButtonFindNextLink_Click(object sender, EventArgs e)
@@ -573,20 +548,14 @@ namespace HeroesLayoutEditor
             {
                 EnableAllEditors();
 
-                for (int i = 0; i < ComboBoxList.Items.Count; i++)
-                    if (Convert.ToByte(ComboBoxList.Items[i].ToString().Substring(0, 2), 16) == SETObjectList[SelectedObject].List)
+                for (int i = 0; i < ComboBoxObject.Items.Count; i++)
+                {
+                    if ((ComboBoxObject.Items[i] as ObjectEntry).List == SETObjectList[SelectedObject].List & (ComboBoxObject.Items[i] as ObjectEntry).Type == SETObjectList[SelectedObject].Type)
                     {
-                        ComboBoxList.SelectedIndex = i;
+                        ComboBoxObject.SelectedIndex = i;
                         break;
                     }
-
-                FillObjectPickerFromList(SETObjectList[SelectedObject].List);
-                for (int i = 0; i < ComboBoxObjectPicker.Items.Count; i++)
-                    if ((ComboBoxObjectPicker.Items[i] as ObjectEntry).Type == SETObjectList[SelectedObject].Type)
-                    {
-                        ComboBoxObjectPicker.SelectedIndex = i;
-                        break;
-                    }
+                }
 
                 SETObjectList[SelectedObject].isSelected = true;
 
@@ -598,44 +567,36 @@ namespace HeroesLayoutEditor
                 NumericRotZ.Value = (decimal)(SETObjectList[SelectedObject].ZRot * 360f / 65536f);
                 NumericObjLink.Value = SETObjectList[SelectedObject].Link;
                 NumericObjRend.Value = SETObjectList[SelectedObject].RendDist;
-                checkBoxMiscSettings.Checked = SETObjectList[SelectedObject].HasMiscID;
+                checkBoxMiscSettings.Checked = SETObjectList[SelectedObject].HasMiscSettings;
                 MiscSettingPicker(SETObjectList[SelectedObject].List, SETObjectList[SelectedObject].Type);
+
+                RichTextBoxDescription.Text = (ComboBoxObject.SelectedItem as ObjectEntry).Description;
+
+                TextBoxNumOfObjects.Text = (SelectedObject + 1).ToString() + "/" + SETObjectList.Count.ToString() + " objects";
             }
             ProgramIsChangingStuff = false;
-
-            TextBoxNumOfObjects.Text = (SelectedObject + 1).ToString() + "/" + SETObjectList.Count.ToString() + " objects";
         }
 
-        public void FillObjectPickerFromList(byte List)
-        {
-            ComboBoxObjectPicker.Items.Clear();
-
-            foreach (ObjectEntry i in ObjectEntryStream)
-                if (i.List == List)
-                    ComboBoxObjectPicker.Items.Add(i);
-        }
-
-        private void ComboBoxList_SelectedIndexChanged(object sender, EventArgs e)
+        private void ComboBoxObjects_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (!ProgramIsChangingStuff)
             {
-                SETObjectList[SelectedObject].List = Convert.ToByte(ComboBoxList.SelectedItem.ToString().Substring(0, 2), 16);
-                SETObjectList[SelectedObject].FindName();
-                FillObjectPickerFromList(SETObjectList[SelectedObject].List);
-                ListBoxObjects.Items[SelectedObject] = SETObjectList[SelectedObject].GetName();
-            }
-        }
+                SETObjectList[SelectedObject].List = (ComboBoxObject.SelectedItem as ObjectEntry).List;
+                SETObjectList[SelectedObject].Type = (ComboBoxObject.SelectedItem as ObjectEntry).Type;
 
-        private void ComboBoxObjectPicker_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (!ProgramIsChangingStuff)
-            {
-                SETObjectList[SelectedObject].Type = (ComboBoxObjectPicker.SelectedItem as ObjectEntry).Type;
                 SETObjectList[SelectedObject].FindName();
                 ListBoxObjects.Items[SelectedObject] = SETObjectList[SelectedObject].GetName();
+
+                SETObjectList[SelectedObject].MiscSettings = new byte[36];
+                SETObjectList[SelectedObject].HasMiscSettings = (ComboBoxObject.SelectedItem as ObjectEntry).HasMiscSettings;
+                checkBoxMiscSettings.Checked = SETObjectList[SelectedObject].HasMiscSettings;
+
+                MiscSettingPicker(SETObjectList[SelectedObject].List, SETObjectList[SelectedObject].Type);
+
+                RichTextBoxDescription.Text = (ComboBoxObject.SelectedItem as ObjectEntry).Description;
             }
         }
-
+        
         private void NumericPosX_ValueChanged(object sender, EventArgs e)
         {
             if (!ProgramIsChangingStuff)
@@ -710,7 +671,7 @@ namespace HeroesLayoutEditor
         IntPtr Pointer2RY;
         IntPtr Pointer2RZ;
         
-        public void DetermineForm0Pointers()
+        public void DeterminePointers()
         {
             MemManager.TryAttachToProcess("SONIC HEROES(TM)");
             Pointer0X = new IntPtr(MemManager.ReadUInt32(new IntPtr(MemManager.ReadUInt32(new IntPtr(0x400000 + 0x5ce820))) + 0x398) + 0x28);
@@ -719,22 +680,14 @@ namespace HeroesLayoutEditor
             Pointer0RX = new IntPtr(MemManager.ReadUInt32(new IntPtr(MemManager.ReadUInt32(new IntPtr(0x400000 + 0x5ce820))) + 0x398) + 0x34);
             Pointer0RY = new IntPtr(MemManager.ReadUInt32(new IntPtr(MemManager.ReadUInt32(new IntPtr(0x400000 + 0x5ce820))) + 0x398) + 0x38);
             Pointer0RZ = new IntPtr(MemManager.ReadUInt32(new IntPtr(MemManager.ReadUInt32(new IntPtr(0x400000 + 0x5ce820))) + 0x398) + 0x3c);
-        }
 
-        public void DetermineForm1Pointers()
-        {
-            MemManager.TryAttachToProcess("SONIC HEROES(TM)");
             Pointer1X = new IntPtr(MemManager.ReadUInt32(new IntPtr(MemManager.ReadUInt32(new IntPtr(0x400000 + 0x5ce824))) + 0x398) + 0x28);
             Pointer1Y = new IntPtr(MemManager.ReadUInt32(new IntPtr(MemManager.ReadUInt32(new IntPtr(0x400000 + 0x5ce824))) + 0x398) + 0x2c);
             Pointer1Z = new IntPtr(MemManager.ReadUInt32(new IntPtr(MemManager.ReadUInt32(new IntPtr(0x400000 + 0x5ce824))) + 0x398) + 0x30);
             Pointer1RX = new IntPtr(MemManager.ReadUInt32(new IntPtr(MemManager.ReadUInt32(new IntPtr(0x400000 + 0x5ce824))) + 0x398) + 0x34);
             Pointer1RY = new IntPtr(MemManager.ReadUInt32(new IntPtr(MemManager.ReadUInt32(new IntPtr(0x400000 + 0x5ce824))) + 0x398) + 0x38);
             Pointer1RZ = new IntPtr(MemManager.ReadUInt32(new IntPtr(MemManager.ReadUInt32(new IntPtr(0x400000 + 0x5ce824))) + 0x398) + 0x3c);
-        }
 
-        public void DetermineForm2Pointers()
-        {
-            MemManager.TryAttachToProcess("SONIC HEROES(TM)");
             Pointer2X = new IntPtr(MemManager.ReadUInt32(new IntPtr(MemManager.ReadUInt32(new IntPtr(0x400000 + 0x5ce828))) + 0x398) + 0x28);
             Pointer2Y = new IntPtr(MemManager.ReadUInt32(new IntPtr(MemManager.ReadUInt32(new IntPtr(0x400000 + 0x5ce828))) + 0x398) + 0x2c);
             Pointer2Z = new IntPtr(MemManager.ReadUInt32(new IntPtr(MemManager.ReadUInt32(new IntPtr(0x400000 + 0x5ce828))) + 0x398) + 0x30);
@@ -742,10 +695,10 @@ namespace HeroesLayoutEditor
             Pointer2RY = new IntPtr(MemManager.ReadUInt32(new IntPtr(MemManager.ReadUInt32(new IntPtr(0x400000 + 0x5ce828))) + 0x398) + 0x38);
             Pointer2RZ = new IntPtr(MemManager.ReadUInt32(new IntPtr(MemManager.ReadUInt32(new IntPtr(0x400000 + 0x5ce828))) + 0x398) + 0x3c);
         }
-
+        
         private void ButtonGetSpeed_Click(object sender, EventArgs e)
         {
-            DetermineForm0Pointers();
+            DeterminePointers();
             if (ProcessIsAttached)
             {
                 NumericPosX.Value = (decimal)MemManager.ReadFloat(Pointer0X);
@@ -757,7 +710,7 @@ namespace HeroesLayoutEditor
 
         private void ButtonGetFly_Click(object sender, EventArgs e)
         {
-            DetermineForm1Pointers();
+            DeterminePointers();
             if (ProcessIsAttached)
             {
                 NumericPosX.Value = (decimal)MemManager.ReadFloat(Pointer1X);
@@ -769,7 +722,7 @@ namespace HeroesLayoutEditor
 
         private void ButtonGetPow_Click(object sender, EventArgs e)
         {
-            DetermineForm2Pointers();
+            DeterminePointers();
             if (ProcessIsAttached)
             {
                 NumericPosX.Value = (decimal)MemManager.ReadFloat(Pointer2X);
@@ -781,7 +734,7 @@ namespace HeroesLayoutEditor
 
         private void ButtonSpeedRot_Click(object sender, EventArgs e)
         {
-            DetermineForm0Pointers();
+            DeterminePointers();
             if (ProcessIsAttached)
             {
                 NumericRotX.Value = (decimal)MemManager.ReadUInt32(Pointer0RX) * (180 / 32768);
@@ -793,7 +746,7 @@ namespace HeroesLayoutEditor
 
         private void ButtonFlyRot_Click(object sender, EventArgs e)
         {
-            DetermineForm1Pointers();
+            DeterminePointers();
             if (ProcessIsAttached)
             {
                 NumericRotX.Value = (decimal)MemManager.ReadUInt32(Pointer1RX) * (180 / 32768);
@@ -805,7 +758,7 @@ namespace HeroesLayoutEditor
 
         private void ButtonPowRot_Click(object sender, EventArgs e)
         {
-            DetermineForm2Pointers();
+            DeterminePointers();
             if (ProcessIsAttached)
             {
                 NumericRotX.Value = (decimal)MemManager.ReadUInt32(Pointer2RX) * (180 / 32768);
@@ -817,10 +770,7 @@ namespace HeroesLayoutEditor
 
         private void ButtonTeleport_Click(object sender, EventArgs e)
         {
-            MemManager.TryAttachToProcess("SONIC HEROES(TM)");
-            DetermineForm0Pointers();
-            DetermineForm1Pointers();
-            DetermineForm2Pointers();
+            DeterminePointers();
             if (ProcessIsAttached)
             {
                 MemManager.Write4bytes(Pointer0X, BitConverter.GetBytes((float)NumericPosX.Value));
@@ -839,7 +789,7 @@ namespace HeroesLayoutEditor
         public void MiscSettingPicker(byte ObjectList, byte ObjectType)
         {
             PropertyGridMisc.SelectedObject = null;
-            if (SETObjectList[SelectedObject].HasMiscID == false)
+            if (SETObjectList[SelectedObject].HasMiscSettings == false)
                 return;
 
             switch (ObjectList)
